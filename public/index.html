@@ -7,6 +7,8 @@
     integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <link rel="stylesheet" href="/stylesheets/style.css">
 
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
   <!-- Latest compiled and minified JavaScript -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
     integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
@@ -15,12 +17,9 @@
 
 <body>
   <h1>DATA TODO</h1>
-  <table class="table table-striped"> 
+  <table class="table table-striped">
     <thead>
-      <tr>
-        <th>Title</th>
-        <th>Complete</th>
-      </tr>
+
     </thead>
     <tbody>
       <tr>
@@ -29,6 +28,95 @@
       </tr>
     </tbody>
   </table>
+
+  <div class="modal fade" id="formModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <form id="form-todo">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="exampleModalLabel">Form Todo</h4>
+          </div>
+          <div class="modal-body">
+
+            <div class="form-group">
+              <label for="title" class="control-label">title:</label>
+              <input type="text" class="form-control" id="title" name="title">
+            </div>
+            <div class="form-group">
+              <label for="complete" class="control-label">complete:</label>
+              <select class="form-control" id="complete" name="complete">
+              <option value="false">belum</option>
+              <option value="true">sudah</option> 
+            </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <button id="add-btn" type="button" class="btn btn-primary" data-toggle="modal" data-target="#formModal">Tambah</button>
+
+  <script>
+    
+    $(document).ready(function () {
+      loadData()
+
+    //   $("#add-btn").click(function () {
+    //     $("#formModal").modal("show")
+    //   })
+
+    $("#form-todo").submit(function(event){
+      event.preventDefault()
+      const value = $(this).serializeArray()
+      const params = {}
+      value.forEach(item => {
+        params[item.name] = item.value
+      })
+      saveData(value)
+      $("#formModal").modal("hide")
+    })
+    }) 
+
+    const loadData = () => {
+      $.ajax({
+        url: "http://localhost:3000/todos",
+        method: "GET",
+        dataType: "json"
+      }).done(function (result) {
+        let html = ""
+        result.forEach(element => {
+          html += `
+      <tr>
+        <th>${element.title}</th>
+        <th>${element.complete ? "sudah" : "belum"}</th>
+      </tr>
+      
+      `
+        });
+        $("table tbody").html(html)
+      })
+    }
+
+    const saveData = (value) => {
+      $.ajax({
+        url: "http://localhost:3000/todos",
+        method: "POST",
+        dataType: "json",
+        data: value
+      }).done(function (result) {
+       loadData()
+      })
+    }
+  </script>
+
+
 </body>
 
 </html>
