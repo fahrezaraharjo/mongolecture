@@ -23,8 +23,10 @@
     </thead>
     <tbody>
       <tr>
-        <td>makan</td>
-        <td>iya</td>
+        <th>No</th>
+        <th>Title</th>
+        <th>Complete</th>
+        <th>Action</th>
       </tr>
     </tbody>
   </table>
@@ -47,9 +49,9 @@
             <div class="form-group">
               <label for="complete" class="control-label">complete:</label>
               <select class="form-control" id="complete" name="complete">
-              <option value="false">belum</option>
-              <option value="true">sudah</option> 
-            </select>
+                <option value="false">belum</option>
+                <option value="true">sudah</option>
+              </select>
             </div>
           </div>
           <div class="modal-footer">
@@ -61,28 +63,27 @@
     </div>
   </div>
 
-  <button id="add-btn" type="button" class="btn btn-primary" data-toggle="modal" data-target="#formModal">Tambah</button>
+  <button id="add-btn" type="button" class="btn btn-primary" data-toggle="modal"
+    data-target="#formModal">Tambah</button>
 
   <script>
-    
+
     $(document).ready(function () {
       loadData()
 
-    //   $("#add-btn").click(function () {
-    //     $("#formModal").modal("show")
-    //   })
+      setInterval(loadData, 1000)
 
-    $("#form-todo").submit(function(event){
-      event.preventDefault()
-      const value = $(this).serializeArray()
-      const params = {}
-      value.forEach(item => {
-        params[item.name] = item.value
+      $("#form-todo").submit(function (event) {
+        event.preventDefault()
+        const value = $(this).serializeArray()
+        const params = {}
+        value.forEach(item => {
+          params[item.name] = item.value
+        })
+        saveData(value)
+        $("#formModal").modal("hide")
       })
-      saveData(value)
-      $("#formModal").modal("hide")
     })
-    }) 
 
     const loadData = () => {
       $.ajax({
@@ -111,7 +112,7 @@
         dataType: "json",
         data: value
       }).done(function (result) {
-       loadData()
+        loadData()
       })
     }
   </script>
