@@ -17,104 +17,199 @@
 
 <body>
   <h1>DATA TODO</h1>
-  <table class="table table-striped">
+  <!--Start table item -->
+  <table class="table table-striped" id="list">
     <thead>
-
-    </thead>
-    <tbody>
       <tr>
         <th>No</th>
         <th>Title</th>
         <th>Complete</th>
         <th>Action</th>
       </tr>
-    </tbody>
+    </thead>
+    <tbody></tbody>
   </table>
-
+  <!--End table item -->
+  <!--Start add modal -->
   <div class="modal fade" id="formModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <form id="form-todo">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="exampleModalLabel">Form Todo</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title" id="exampleModalLabel">New TODO</h4>
           </div>
           <div class="modal-body">
-
             <div class="form-group">
-              <label for="title" class="control-label">title:</label>
-              <input type="text" class="form-control" id="title" name="title">
+              <label for="title" class="control-label">Title:</label>
+              <input type="text" class="form-control" id="title" name="title" />
             </div>
             <div class="form-group">
-              <label for="complete" class="control-label">complete:</label>
+              <label for="complete" class="control-label">Complete:</label>
               <select class="form-control" id="complete" name="complete">
-                <option value="false">belum</option>
-                <option value="true">sudah</option>
+                <option value="false">Not Done</option>
+                <option value="true">Done</option>
               </select>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+              Close
+            </button>
             <button type="submit" class="btn btn-primary">Save</button>
           </div>
         </form>
       </div>
     </div>
   </div>
+  <!--End Add modal -->
 
-  <button id="add-btn" type="button" class="btn btn-primary" data-toggle="modal"
-    data-target="#formModal">Tambah</button>
+  <!--Start Edit modal -->
+  <div class="modal fade" id="editFormModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <form id="edit-todo">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title" id="exampleModalLabel">Edit TODO</h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="editTitle" class="control-label">Title:</label>
+              <input type="text" class="form-control" id="editTitle" />
+            </div>
+            <div class="form-group">
+              <label for="editComplete" class="control-label">Complete:</label>
+              <select class="form-control" id="editComplete">
+                <option value="false">Not Done</option>
+                <option value="true">Done</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+              Close
+            </button>
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!--End Edit modal -->
+
+  <button id="add-btn" class="btn btn-primary">Add</button>
 
   <script>
 
-    $(document).ready(function () {
-      loadData()
+$(document).ready(function () {
+        loadData(); //show all data
+        // setInterval(loadData, 1000);
 
-      setInterval(loadData, 1000)
-
-      $("#form-todo").submit(function (event) {
-        event.preventDefault()
-        const value = $(this).serializeArray()
-        const params = {}
-        value.forEach(item => {
-          params[item.name] = item.value
-        })
-        saveData(value)
-        $("#formModal").modal("hide")
-      })
-    })
-
-    const loadData = () => {
-      $.ajax({
-        url: "http://localhost:3000/todos",
-        method: "GET",
-        dataType: "json"
-      }).done(function (result) {
-        let html = ""
-        result.forEach(element => {
-          html += `
-      <tr>
-        <th>${element.title}</th>
-        <th>${element.complete ? "sudah" : "belum"}</th>
-      </tr>
-      
-      `
+        $("#form-todo").submit(function (event) {
+          event.preventDefault();
+          const value = $(this).serializeArray(); // jquery get value from form-todo
+          const params = {};
+          value.forEach((item) => {
+            params[item.name] = item.value;
+          });
+          addData(params);
+          $("#formModal").modal("hide");
         });
-        $("table tbody").html(html)
-      })
-    }
+      });
 
-    const saveData = (value) => {
-      $.ajax({
-        url: "http://localhost:3000/todos",
-        method: "POST",
-        dataType: "json",
-        data: value
-      }).done(function (result) {
-        loadData()
-      })
-    }
+      $("#add-btn").click(function () {
+        //show formModal when clicking add button
+        $("#formModal").modal("show");
+      });
+
+      $("#list").on("click", ".edit-btn", function () {
+        const id = $(this).attr("mongo-id");
+
+        $.get(`http://localhost:3000/todos/${id}`, function (data) {
+          $("#editTitle").val(data.title);
+          $("#editComplete").find("option :selected").text();
+          $("#editFormModal").modal("show");
+
+          $("#edit-todo").submit(function (event) {
+            $.ajax({
+              url: `http://localhost:3000/todos/${id}`,
+              method: "PUT",
+              dataType: "json",
+              data: {
+                _id: id,
+                title: $("#editTitle").val(),
+                complete: $("#editComplete").val(),
+              },
+            })
+              .done(function (result) {
+                loadData();
+              })
+              .fail(function (jqXHR, textStatus) {
+                alert("Request failed: " + textStatus);
+              });
+          });
+        });
+      });
+
+      const loadData = () => {
+        $.ajax({
+          url: "http://localhost:3000/todos",
+          method: "GET",
+          dataType: "json",
+        }).done(function (result) {
+          let html = "";
+          result.forEach((element, index) => {
+            html += `
+              <tr>
+                <td>${index + 1}</td>
+                <td>${element.title}</td>
+                <td>${element.complete ? "done" : "not done"}</td>
+                <td>
+                  <button class="btn btn-success edit-btn" mongo-id="${
+                    element._id
+                  }">Edit</button>
+                  <button class="btn btn-danger delete-btn" mongo-id="${
+                    element._id
+                  }">Delete</button>
+                </td>
+              </tr>
+            `;
+          });
+          $("table tbody").html(html);
+        });
+      };
+
+      const addData = (value) => {
+        $.ajax({
+          url: "http://localhost:3000/todos",
+          method: "POST",
+          dataType: "json",
+          data: value,
+        }).done(function (result) {
+          loadData();
+        });
+      };
+
+      $("#list").on("click", ".delete-btn", function () {
+        const id = $(this).attr("mongo-id");
+        $.ajax({
+          url: `http://localhost:3000/todos/${id}`,
+          method: "DELETE",
+          dataType: "json",
+        })
+          .done(function (result) {
+            console.log(result);
+            loadData();
+          })
+          .fail(function (jqXHR, textStatus) {
+            alert("Request failed: " + textStatus);
+          });
+      });
   </script>
 
 
