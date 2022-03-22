@@ -6,15 +6,22 @@ module.exports = function (db) {
   const collection = db.collection("todos")
 
   router.get('/', async function (req, res, next) {
-    const todos = await collection.find({}).toArray()
-    res.json(todos)
+    const todo = await collection.find({}).toArray()
+    res.json(todo)
   });
+
+  router.get('/:id', async function (req, res, next) {
+    const todo = await collection.findOne({_id: new ObjectId(req.params.id)})
+    res.json(todo)
+  });
+
 
   router.post('/', async function (req, res, next) {
     const dataCreated = await collection.insertOne({ title: req.body.title, complete: false })
     const todo = await collection.findOne(dataCreated.insertedId)
     res.json(todo)
   });
+
 
   router.put('/:id', async function (req, res, next) {
     const todo = await collection.findOneAndUpdate({

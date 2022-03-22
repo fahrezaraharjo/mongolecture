@@ -106,110 +106,127 @@
 
   <script>
 
-$(document).ready(function () {
-        loadData(); //show all data
-        // setInterval(loadData, 1000);
+    $(document).ready(function () {
+      loadData(); //show all data
+      // setInterval(loadData, 1000);
 
-        $("#form-todo").submit(function (event) {
-          event.preventDefault();
-          const value = $(this).serializeArray(); // jquery get value from form-todo
-          const params = {};
-          value.forEach((item) => {
-            params[item.name] = item.value;
-          });
-          addData(params);
-          $("#formModal").modal("hide");
+      $("#form-todo").submit(function (event) {
+        event.preventDefault();
+        const value = $(this).serializeArray(); // jquery get value from form-todo
+        const params = {};
+        value.forEach((item) => {
+          params[item.name] = item.value;
         });
+        addData(params);
+        $("#formModal").modal("hide");
       });
+    });
+    $(document).ready(function () {
+      loadData()
 
-      $("#add-btn").click(function () {
-        //show formModal when clicking add button
-        $("#formModal").modal("show");
-      });
+      $(`#from-todo`).submit(function (event) {
+        event.preventDefault()
+        const value = $(this).serializeArray()
+        const params = {}
+        value.forEach((item) => {
+          params[item.name] = item.value
+        })
+        addData(params);
+        $(`formModal`).modal("hide")
+      })
+    })
+    $(document).ready(function () {
+      loadData()
+    })
 
-      $("#list").on("click", ".edit-btn", function () {
-        const id = $(this).attr("mongo-id");
+    $("#add-btn").click(function () {
+      //show formModal when clicking add button
+      $("#formModal").modal("show");
+    });
 
-        $.get(`http://localhost:3000/todos/${id}`, function (data) {
-          $("#editTitle").val(data.title);
-          $("#editComplete").find("option :selected").text();
-          $("#editFormModal").modal("show");
 
-          $("#edit-todo").submit(function (event) {
-            $.ajax({
-              url: `http://localhost:3000/todos/${id}`,
-              method: "PUT",
-              dataType: "json",
-              data: {
-                _id: id,
-                title: $("#editTitle").val(),
-                complete: $("#editComplete").val(),
-              },
+    //edit modal
+    $("#list").on("click", ".edit-btn", function () {
+      const id = $(this).attr("mongo-id");
+
+
+      $.get(`http://localhost:3000/todos/`, function (data) {
+        $("#editTitle").val(data.title);
+        $("#editComplete").find("option :selected").text();
+        $("#editFormModal").modal("show");
+        $("#edit-todo").submit(function (event) {
+          $.ajax({
+            url: `http://localhost:3000/todos/${id}`,
+            method: "PUT",
+            dataType: "json",
+            data: {
+              _id: id,
+              title: $("#editTitle").val(),
+              complete: $("#editComplete").val(),
+            },
+          })
+            .done(function (result) {
+              loadData();
             })
-              .done(function (result) {
-                loadData();
-              })
-              .fail(function (jqXHR, textStatus) {
-                alert("Request failed: " + textStatus);
-              });
-          });
+            .fail(function (jqXHR, textStatus) {
+              alert("Request failed: " + textStatus);
+            });
         });
       });
+    });
 
-      const loadData = () => {
-        $.ajax({
-          url: "http://localhost:3000/todos",
-          method: "GET",
-          dataType: "json",
-        }).done(function (result) {
-          let html = "";
-          result.forEach((element, index) => {
-            html += `
+    const loadData = () => {
+      $.ajax({
+        url: `http://localhost:3000/todos/`,
+        method: "GET",
+        dataType: "json",
+      }).done(function (result) {
+        let html = "";
+        result.forEach((element, index) => {
+          html += `
               <tr>
                 <td>${index + 1}</td>
                 <td>${element.title}</td>
                 <td>${element.complete ? "done" : "not done"}</td>
                 <td>
-                  <button class="btn btn-success edit-btn" mongo-id="${
-                    element._id
-                  }">Edit</button>
-                  <button class="btn btn-danger delete-btn" mongo-id="${
-                    element._id
-                  }">Delete</button>
+                  <button class="btn btn-success edit-btn" mongo-id="${element._id
+            }">Edit
+                  <button class="btn btn-danger delete-btn" mongo-id="${element._id
+            }">Delete</button>
                 </td>
               </tr>
             `;
-          });
-          $("table tbody").html(html);
         });
-      };
-
-      const addData = (value) => {
-        $.ajax({
-          url: "http://localhost:3000/todos",
-          method: "POST",
-          dataType: "json",
-          data: value,
-        }).done(function (result) {
-          loadData();
-        });
-      };
-
-      $("#list").on("click", ".delete-btn", function () {
-        const id = $(this).attr("mongo-id");
-        $.ajax({
-          url: `http://localhost:3000/todos/${id}`,
-          method: "DELETE",
-          dataType: "json",
-        })
-          .done(function (result) {
-            console.log(result);
-            loadData();
-          })
-          .fail(function (jqXHR, textStatus) {
-            alert("Request failed: " + textStatus);
-          });
+        $("table tbody").html(html);
       });
+    };
+
+    const addData = (value) => {
+      $.ajax({
+        url: "http://localhost:3000/todos",
+        method: "POST",
+        dataType: "json",
+        data: value,
+      }).done(function (result) {
+        loadData();
+      });
+    };
+
+    $("#list").on("click", ".delete-btn", function () {
+      const id = $(this).attr("mongo-id");
+      $.ajax({
+        url: `http://localhost:3000/todos/${id}`,
+        method: "DELETE",
+        dataType: "json",
+      })
+        .done(function (result) {
+          console.log(result);
+          loadData();
+        })
+        .fail(function (jqXHR, textStatus) {
+          alert("Request failed: " + textStatus);
+        });
+    });
   </script>
 
 
