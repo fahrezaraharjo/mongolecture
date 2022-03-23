@@ -22,7 +22,7 @@ async function main() {
 
 
 
-    var indexRouter = require('./routes/index');
+    var indexRouter = require('./routes/index')(db);
     var todosRouter = require('./routes/todos')(db);
 
     var app = express();
