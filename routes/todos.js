@@ -1,13 +1,17 @@
 var express = require('express');
 var router = express.Router();
 const ObjectId = require("mongodb").ObjectId
+const helpers = require("../helpers/util")
 
 module.exports = function (db) {
   const collection = db.collection("todos")
 
-  router.get('/', async function (req, res, next) {
-    const todo = await collection.find({}).toArray()
-    res.json(todo)
+  router.get('/', helpers.isAuthenticated, async function (req, res, next) {
+    const todos = await collection.find({userid: req.user._id}).toArray()
+    res.json({
+      success: true, 
+      data: todos
+    })
   });
 
   router.get('/:id', async function (req, res, next) {
@@ -16,8 +20,8 @@ module.exports = function (db) {
   });
 
 
-  router.post('/', async function (req, res, next) {
-    const dataCreated = await collection.insertOne({ title: req.body.title, complete: false })
+  router.post('/', helpers.isAuthenticated, async function (req, res, next) {
+    const dataCreated = await collection.insertOne({ title: req.body.title, complete: false, userid: req.user._id })
     const todo = await collection.findOne(dataCreated.insertedId)
     res.json(todo)
   });

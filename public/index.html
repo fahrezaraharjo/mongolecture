@@ -13,9 +13,11 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
     integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
     crossorigin="anonymous"></script>
+    <script src="/javascripts/util.js"></script>
 </head>
 
 <body>
+  <button type="button" class="btn btn-danger" onclick="logout()">logout</button>
   <h1>DATA TODO</h1>
   <!--Start table item -->
   <table class="table table-striped" id="list">
@@ -117,12 +119,14 @@
         value.forEach((item) => {
           params[item.name] = item.value;
         });
-        addData(params);
+        saveData(params);
         $("#formModal").modal("hide");
       });
     });
     $(document).ready(function () {
       loadData()
+
+      setInterval(loadData, 1000)
 
       $(`#from-todo`).submit(function (event) {
         event.preventDefault()
@@ -180,9 +184,13 @@
         url: `http://localhost:3000/todos/`,
         method: "GET",
         dataType: "json",
+        headers: {
+        "Authorization":`Bearer ${localStorage.getItem("token")}`
+    }
       }).done(function (result) {
+        if(result.success){
         let html = "";
-        result.forEach((element, index) => {
+        result.data.forEach((element, index) => {
           html += `
               <tr>
                 <td>${index + 1}</td>
@@ -198,15 +206,21 @@
             `;
         });
         $("table tbody").html(html);
+      } else {
+        window.location = "/login.html"
+      }
       });
     };
 
-    const addData = (value) => {
+    const saveData = (value) => {
       $.ajax({
         url: "http://localhost:3000/todos",
         method: "POST",
         dataType: "json",
         data: value,
+        headers: {
+        "Authorization":`Bearer ${localStorage.getItem("token")}`
+    }
       }).done(function (result) {
         loadData();
       });
