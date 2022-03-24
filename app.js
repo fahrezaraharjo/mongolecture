@@ -3,6 +3,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const { MongoClient } = require('mongodb');
+const cors = require("cors")
 // or as an es module:
 // import { MongoClient } from 'mongodb'
 
@@ -32,6 +33,7 @@ async function main() {
     app.use(express.urlencoded({ extended: false }));
     app.use(cookieParser());
     app.use(express.static(path.join(__dirname, 'public')));
+    app.use(cors())
 
     app.use('/', indexRouter);
     app.use('/todos', todosRouter);
